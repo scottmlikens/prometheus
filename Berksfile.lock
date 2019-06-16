@@ -1,0 +1,24 @@
+DEPENDENCIES
+  apt
+  build-essential
+  prometheus
+    path: .
+    metadata: true
+  test_prom
+    path: test/cookbooks/test_prom
+
+GRAPH
+  apt (7.1.1)
+  build-essential (8.2.1)
+    mingw (>= 1.1)
+    seven_zip (>= 0.0.0)
+  mingw (2.1.0)
+    seven_zip (>= 0.0.0)
+  prometheus (0.1.0)
+    systemd (>= 0.0.0)
+  seven_zip (3.1.1)
+    windows (>= 0.0.0)
+  systemd (3.2.4)
+  test_prom (0.1.0)
+    prometheus (>= 0.0.0)
+  windows (6.0.0)
