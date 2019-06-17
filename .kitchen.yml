@@ -1,0 +1,24 @@
+---
+driver:
+  name: vagrant
+  customize:
+    memory: '1024'
+
+chef_license: accept
+provisioner:
+  name: chef_solo
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-18.04
+    run_list:
+    - recipe[apt]
+
+suites:
+  - name: default
+    run_list:
+    - recipe[build-essential]
+    - recipe[test_prom::default]

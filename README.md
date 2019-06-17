@@ -1,6 +1,6 @@
 # Prometheus Cookbook
 
-This cookbook can be used in part or whole to automate [prometheus](https://prometheus.io/).
+This cookbook can be used in part or whole to automate [prometheus](https://prometheus.io/) similar to how it is installed in Debian/Ubuntu.
 
 Pull requests are always welcome to improve this cookbook
 ---------------
