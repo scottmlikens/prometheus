@@ -4,7 +4,7 @@ maintainer_email 'scott@likens.us'
 license "Apache 2.0"
 description 'Installs/Configures prometheus'
 long_description 'Installs/Configures prometheus'
-version '0.1.0'
+version '0.2.0'
 chef_version '>= 12.14' if respond_to?(:chef_version)
 depends "systemd"
 issues_url 'https://github.com/damm/prometheus/issues'

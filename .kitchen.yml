@@ -22,3 +22,7 @@ suites:
     run_list:
     - recipe[build-essential]
     - recipe[test_prom::default]
+
+  - name: node
+    run_list:
+    - recipe[test_prom::exporter]
