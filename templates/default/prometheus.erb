@@ -3,6 +3,6 @@
 
 # Set the command-line arguments to pass to the server.
 ARGS="<%= @args.join(" ") %>"
-<% if @dsn.size > 1 %>
+<% if @dsn %>
 DATA_SOURCE_NAME=<%= @dsn %>
 <% end %>

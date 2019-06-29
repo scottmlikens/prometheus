@@ -1,5 +1,10 @@
 # prometheus CHANGELOG
 
+# 0.3.1
+
+Bugfix in template
+
+
 # 0.3.0
 
 Add mysqld_exporter installation
