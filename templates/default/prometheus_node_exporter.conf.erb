@@ -25,4 +25,4 @@ setgid root
 # console log - uncomment log stdout/stderr to /var/log/upstart/
 console none # Ubuntu 12.04++ requires explicitly saying we don't want to log anything
 
-exec /usr/bin/node_exporter --collector.netstat.fields=(.*) --collector.vmstat.fields=(.*) --collector.interrupts
+exec /usr/bin/node_exporter "--collector.netstat.fields=(.*) --collector.vmstat.fields=(.*) --collector.interrupts"

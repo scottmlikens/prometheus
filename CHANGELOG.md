@@ -1,5 +1,8 @@
 # prometheus CHANGELOG
 
+# 0.3.3
+
+Started in Vagrant once failed further without the quotes around the ()'s 
 # 0.3.2
 
 Add 14.04 support for node exporter
