@@ -1,5 +1,9 @@
 # prometheus CHANGELOG
 
+# 0.3.2
+
+Add 14.04 support for node exporter
+
 # 0.3.1
 
 Bugfix in template

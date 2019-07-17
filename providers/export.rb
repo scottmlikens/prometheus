@@ -36,24 +36,37 @@ action :node do
       :args => new_resource.arguments
     )
   end
-  systemd_service 'prometheus-node-exporter' do
-    unit do
-      description 'Node Exporter'
-      documentation 'https://www.prometheus.io'
-      after %w( networking.service  )
+  case node['platform_version']
+  when '14.04'
+    template "/etc/init/prometheus-node-exporter.conf" do
+      source "prometheus_node_exporter.conf.erb"
+      cookbook "prometheus"
     end
-    service do
-      type 'simple'
-      exec_start '/usr/bin/node_exporter $ARGS'
-      exec_reload '/bin/kill -HUP $MAINPID'
-      service_environment_file '/etc/default/prometheus-node-exporter'
-      timeout_stop_sec '20s'
+    service "prometheus-node_exporter_upstart" do
+      service_name "prometheus-node-exporter"
+      action [:start,:enable]
+      provider Chef::Provider::Service::Upstart
     end
-  end
-  service "prometheus-node-exporter" do
-    action [:start,:enable]
-    provider Chef::Provider::Service::Systemd
-    subscribes :restart, "template[/etc/default/prometheus-node-exporter]", :delayed
+  else
+    systemd_service 'prometheus-node-exporter' do
+      unit do
+        description 'Node Exporter'
+        documentation 'https://www.prometheus.io'
+        after %w( networking.service  )
+      end
+      service do
+        type 'simple'
+        exec_start '/usr/bin/node_exporter $ARGS'
+        exec_reload '/bin/kill -HUP $MAINPID'
+        service_environment_file '/etc/default/prometheus-node-exporter'
+        timeout_stop_sec '20s'
+      end
+    end
+    service "prometheus-node-exporter" do
+      action [:start,:enable]
+      provider Chef::Provider::Service::Systemd
+      subscribes :restart, "template[/etc/default/prometheus-node-exporter]", :delayed
+    end
   end
 end
 
