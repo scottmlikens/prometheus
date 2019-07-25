@@ -1,5 +1,10 @@
 # prometheus CHANGELOG
 
+
+# 0.4.0
+
+Add alertmanager
+
 # 0.3.3
 
 Started in Vagrant once failed further without the quotes around the ()'s 

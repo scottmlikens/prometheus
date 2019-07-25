@@ -24,7 +24,10 @@ suites:
     run_list:
     - recipe[build-essential]
     - recipe[test_prom::default]
-
+  - name: alertmanager
+    run_list:
+    - recipe[test_prom::default]
+    - recipe[test_prom::alertmanager]
   - name: node
     run_list:
     - recipe[test_prom::exporter]

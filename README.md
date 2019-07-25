@@ -11,6 +11,7 @@ Requirements
 Debian based Linux Distribution using Systemd such as:
   - Ubuntu `16.04`
   - Ubuntu `18.04`
+  - Ubuntu `14.04` is supported for the node exporter only.
 
 It is not tested on other environments but it may work.
 
@@ -52,6 +53,22 @@ Actions:
 | arguments | Array| Command line arguments to start prometheus with | `['--config.file="/etc/prometheus/prometheus.yml"']` | Yes |
 | template_name | String | Filename of the template for `/etc/default/prometheus` | `prometheus.erb` | Yes |
 | cookbook | String | Indicated which cookbook holds `prometheus.conf.erb` | `prometheus` | Yes |
+
+### alertmanager::install
+| Attribute | Type | Description | Default | Required |
+|--|--|--|--|--|
+| version | String | Version of Alertmanager to install | `0.18.0` | Yes |
+| checksum | String | Checksum of Alertmanager tarball | `5f17155d669a8d2243b0d179fa46e609e0566876afd0afb09311a8bc7987ab15` | Yes |
+| base_uri | String | Base URI to Download Alertmanager From | `https://github.com/prometheus/alertmanager/releases/download/` | Yes |
+| home_dir | String | Home Directory for Prometheus User | `/opt/prometheus` | Yes |
+
+### alertmanager::start
+| Attribute | Type | Description | Default | Required |
+|--|--|--|--|--|
+| cookbook | String | Cookbook name that holds the prometheus.erb template | `prometheus` | Yes |
+| template_name | String | Template name if you don't want to use `prometheus.erb` | `prometheus.erb` | Yes |
+| arguments | String | Arguments to start Alertmanager with | `--config.file="/etc/prometheus/alertmanager.yml"` | Yes |
+
 
 Usage
 -----
