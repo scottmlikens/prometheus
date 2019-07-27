@@ -40,4 +40,4 @@ suites:
   - name: statsd
     run_list:
     - recipe[test_prom::exporter_statsd]
-    includes: ["ubuntu-18.04"]
+    includes: ["ubuntu-18.04","ubuntu-14.04"]

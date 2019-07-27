@@ -14,7 +14,7 @@ GRAPH
     seven_zip (>= 0.0.0)
   mingw (2.1.0)
     seven_zip (>= 0.0.0)
-  prometheus (0.4.1)
+  prometheus (0.4.2)
     systemd (>= 0.0.0)
   seven_zip (3.1.1)
     windows (>= 0.0.0)

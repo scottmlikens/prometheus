@@ -167,35 +167,49 @@ action :statsd do
     command "mv statsd_exporter /usr/bin"
     creates "/usr/bin/statsd_exporter"
   end
-  template "/etc/default/prometheus-statsd-exporter" do
-    source new_resource.template_name
-    cookbook new_resource.cookbook
-    owner 'prometheus'
-    group 'prometheus'
-    variables(
-      :args => new_resource.arguments
-    )
-  end
-  systemd_service 'prometheus-statsd-exporter' do
-    unit do
-      description 'StatsD Exporter'
-      documentation 'https://www.prometheus.io'
-      after %w( networking.service  )
+  case node['platform_version']
+  when '14.04'
+    template "/etc/init/prometheus-statsd-exporter.conf" do
+      source "prometheus_statsd_exporter.conf.erb"
+      cookbook "prometheus"
     end
-    install do
-      wanted_by %w( multi-user.target )
+    service "prometheus-statsd_exporter_upstart" do
+      service_name "prometheus-statsd-exporter"
+      action [:start,:enable]
+      provider Chef::Provider::Service::Upstart
     end
-    service do
-      type 'simple'
-      exec_start '/usr/bin/statsd_exporter $ARGS'
-      exec_reload '/bin/kill -HUP $MAINPID'
-      service_environment_file '/etc/default/prometheus-statsd-exporter'
-      timeout_stop_sec '20s'
+    
+  else
+    template "/etc/default/prometheus-statsd-exporter" do
+      source new_resource.template_name
+      cookbook new_resource.cookbook
+      owner 'prometheus'
+      group 'prometheus'
+      variables(
+        :args => new_resource.arguments
+      )
     end
-  end
-  service "prometheus-statsd-exporter" do
-    action [:start,:enable]
-    provider Chef::Provider::Service::Systemd
-    subscribes :restart, "template[/etc/default/prometheus-statsd-exporter]", :delayed
+    systemd_service 'prometheus-statsd-exporter' do
+      unit do
+        description 'StatsD Exporter'
+        documentation 'https://www.prometheus.io'
+        after %w( networking.service  )
+      end
+      install do
+        wanted_by %w( multi-user.target )
+      end
+      service do
+        type 'simple'
+        exec_start '/usr/bin/statsd_exporter $ARGS'
+        exec_reload '/bin/kill -HUP $MAINPID'
+        service_environment_file '/etc/default/prometheus-statsd-exporter'
+        timeout_stop_sec '20s'
+      end
+    end
+    service "prometheus-statsd-exporter" do
+      action [:start,:enable]
+      provider Chef::Provider::Service::Systemd
+      subscribes :restart, "template[/etc/default/prometheus-statsd-exporter]", :delayed
+    end
   end
 end

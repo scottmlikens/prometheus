@@ -1,5 +1,9 @@
 # prometheus CHANGELOG
 
+# 0.4.3
+
+Make statsd exporter support ubuntu 14.04
+
 # 0.4.2
 
 Add statsd exporter
