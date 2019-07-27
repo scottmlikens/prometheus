@@ -1,5 +1,9 @@
 # prometheus CHANGELOG
 
+# 0.4.1
+
+Make it so node exporter and mysql start on reboot
+Add --collector.tcpstat to the argument list by default
 
 # 0.4.0
 

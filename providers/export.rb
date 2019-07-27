@@ -54,6 +54,9 @@ action :node do
         documentation 'https://www.prometheus.io'
         after %w( networking.service  )
       end
+      install do
+        wanted_by %w( multi-user.target )
+      end
       service do
         type 'simple'
         exec_start '/usr/bin/node_exporter $ARGS'
@@ -114,6 +117,9 @@ action :mysql do
       description 'MySQLd Exporter'
       documentation 'https://www.prometheus.io'
       after %w( networking.service  )
+    end
+    install do
+      wanted_by %w( multi-user.target )
     end
     service do
       type 'simple'
