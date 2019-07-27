@@ -24,13 +24,20 @@ suites:
     run_list:
     - recipe[build-essential]
     - recipe[test_prom::default]
+    includes: ["ubuntu-18.04"]
   - name: alertmanager
     run_list:
     - recipe[test_prom::default]
     - recipe[test_prom::alertmanager]
+    includes: ["ubuntu-18.04"]
   - name: node
     run_list:
     - recipe[test_prom::exporter]
   - name: mysql
     run_list:
     - recipe[test_prom::exporter_mysql]
+    includes: ["ubuntu-18.04"]
+  - name: statsd
+    run_list:
+    - recipe[test_prom::exporter_statsd]
+    includes: ["ubuntu-18.04"]

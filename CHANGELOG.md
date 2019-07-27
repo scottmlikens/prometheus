@@ -1,5 +1,9 @@
 # prometheus CHANGELOG
 
+# 0.4.2
+
+Add statsd exporter
+
 # 0.4.1
 
 Make it so node exporter and mysql start on reboot
