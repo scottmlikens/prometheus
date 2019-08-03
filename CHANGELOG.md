@@ -1,5 +1,9 @@
 # prometheus CHANGELOG
 
+# 0.4.4
+
+Make node exporter ignore veth and docker0 and lo by default
+
 # 0.4.3
 
 Make statsd exporter support ubuntu 14.04
