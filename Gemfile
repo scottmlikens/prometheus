@@ -1,0 +1,10 @@
+source 'https://rubygems.org/'
+
+gem 'chef', '12.22.5'
+gem 'test-kitchen'
+gem 'kitchen-inspec'
+gem 'kitchen-docker'
+gem 'kitchen-dokken'
+gem 'kitchen-vagrant'
+gem 'berkshelf'
+gem 'kitchen-sync'
