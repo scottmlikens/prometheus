@@ -1,5 +1,13 @@
 # prometheus CHANGELOG
 
+# 0.5.0 
+
+Drop Ubuntu 14.04 support
+Remove export.rb resource and provider in favor of an single action resource and provider
+Move installation of exporters to `/opt/prometheus`
+Move installation of prometheus to `/opt/prometheus` and version the binaries to ease upgrade pain
+Same with alertmanager
+
 # 0.4.4
 
 Make node exporter ignore veth and docker0 and lo by default

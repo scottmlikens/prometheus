@@ -1,11 +1,13 @@
 actions :install, :config, :start
 
-property :version, String, default: '2.10.0'
-property :checksum, String, default: 'f4233783826f18606b79e5cef0686e4a9c2030146a3c7ce134f0add09f5adcb7'
-property :base_uri, String, default: 'https://github.com/prometheus/prometheus/releases/download/'
+property :version, String
+property :checksum, String
+property :uri, String
 property :home_dir, String, default: '/opt/prometheus'
 property :local_storage_path, String, default: '/var/lib/prometheus'
 property :cookbook, String, default: 'prometheus'
+property :filename, String
+property :pathname, String
 
 # Config
 
