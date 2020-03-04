@@ -103,25 +103,3 @@ action :start do
   end
 end
 
-action :config do
-  directory "/etc/prometheus" do
-    action :create
-    recursive true
-    owner "prometheus"
-    group "prometheus"
-  end
-  config = Hash.new
-  config['global']=JSON.parse(JSON.dump(new_resource.global || {}.to_hash))
-  config['rule_files']=new_resource.rule_files unless new_resource.rule_files.empty?
-  config['scrape_configs']=JSON.parse(JSON.dump(new_resource.scrape_configs || {}.to_hash))
-  file "/etc/prometheus/prometheus.yml" do
-    content YAML.dump(config, symbolize_names: false)
-  end
-  service "prometheus_service" do
-    service_name "prometheus"
-    action [:start,:enable]
-    provider Chef::Provider::Service::Systemd
-    subscribes :restart, "file[/etc/prometheus/prometheus.yml", :delayed
-  end
-end
-
