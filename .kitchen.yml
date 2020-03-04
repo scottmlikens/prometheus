@@ -8,6 +8,8 @@ chef_license: accept
 provisioner:
   name: chef_solo
   deprecations_as_errors: true
+  chef_omnibus_url: https://omnitruck.cinc.sh/install.sh
+  chef_omnibus_root: /opt/cinc
 
 verifier:
   name: inspec
