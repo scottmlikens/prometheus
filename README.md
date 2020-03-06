@@ -11,9 +11,9 @@ Debian based Linux Distribution using Systemd such as:
 
 Resources and Providers
 -----
-`monitor.rb`
-`alertmanager.rb`
-`exporter.rb`
+`monitor.rb`  
+`alertmanager.rb`  
+`exporter.rb`  
 ------
 
 Install or configure or start the Prometheus service using this resource.
@@ -102,7 +102,7 @@ subscribes :restart, "template[/etc/prometheus/prometheus.yml", :delayed
 end
 ```
 
-Further [here](https://github.com/damm/prometheus/tree/master/test/cookbooks/test_prom/recipes)
+Further [examples can be found here](https://github.com/damm/prometheus/tree/master/test/cookbooks/test_prom/recipes)
 
 License and Author
 -------------------
