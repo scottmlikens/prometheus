@@ -1,9 +1,9 @@
 control 'it should have prometheus installed' do
-  describe file('/usr/bin/prometheus') do
+  describe file('/opt/prometheus/bin/prometheus-2.16.0') do
     it { should be_file }
     it { should be_executable }
   end
-  describe file('/usr/bin/promtool') do
+  describe file('/opt/prometheus/bin/promtool-2.16.0') do
     it { should be_file }
     it { should be_executable }
   end

@@ -1,0 +1,27 @@
+groups:
+  - name: default
+    rules:
+    - alert: HighCPULoad
+      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High CPU load (instance {{ $labels.instance }})"
+        description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighLoadWarning
+      expr: (avg by(instance) (count(node_cpu_seconds_total{mode="idle"}) without (cpu,mode) <= node_load1))
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Warning System Load (instance {{ $labels.instance }})"
+        description: "System Load is <= CPU Total\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighLoadCritical
+      expr: (avg by(instance) (count(node_cpu_seconds_total{mode="idle"}) without (cpu,mode) * 2 <= node_load1))
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Critical System Load (instance {{ $labels.instance }})"
+        description: "System Load is <= CPU Total * 2\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

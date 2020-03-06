@@ -1,11 +1,21 @@
-actions :install, :start
+actions :create
+default_action :create
 
-property :version, String, default: '0.18.0'
-property :checksum, String, default: '5f17155d669a8d2243b0d179fa46e609e0566876afd0afb09311a8bc7987ab15'
-property :base_uri, String, default: 'https://github.com/prometheus/alertmanager/releases/download/'
-property :home_dir, String, default: '/opt/prometheus'
-property :cookbook, String, default: 'prometheus'
-
-
-property :arguments, Array, default: ['--config.file="/etc/prometheus/alertmanager.yml"']
-property :template_name, String, default: "prometheus.erb"
+# Version of alertmanager to install
+property :version, String, required: true
+# Checksum of the alertmanager tarball
+property :checksum, String, required: true
+# URI to the alertmanager tarball archive
+property :uri, String, required: true
+# Prometheus home directory
+property :home_dir, String, default: '/opt/prometheus', required: true
+# Cookbook name that holds prometheus.erb
+property :cookbook, String, default: 'prometheus', required: true
+# Filename of the template used to create /etc/default/alertmanager
+property :template_name, String, default: "prometheus.erb", required: true
+# Filename of the alertmanager tarball archive
+property :filename, String, required: true
+# The path where the binaries are created after extracting the tarball
+property :pathname, String, required: true
+# arguments passed to start alertmanager on the command line
+property :arguments, Array, default: ['--config.file="/etc/prometheus/alertmanager.yml"'], required: true

@@ -7,8 +7,8 @@ def whyrun_supported?
 end
 
 
-action :install do
-  user "prometheus" do
+action :create do
+  user 'prometheus' do
     system true
     shell '/bin/false'
     home new_resource.home_dir
@@ -17,35 +17,39 @@ action :install do
     action :create
     recursive true
     mode '0755'
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
   end
-  arch = /x86_64/.match(node[:kernel][:machine]) ? 'amd64' : 'i686'
-  remote_file "#{Chef::Config[:file_cache_path]}/alertmanager-#{new_resource.version}.#{node['os']}_#{arch}.tar.gz" do
-    source "#{new_resource.base_uri}v#{new_resource.version}/alertmanager-#{new_resource.version}.#{node['os']}-#{arch}.tar.gz"
+  directory new_resource.home_dir + '/bin' do
+    action :create
+    owner 'prometheus'
+    group 'prometheus'
+    mode 0755
+  end
+  remote_file Chef::Config[:file_cache_path] + '/' + new_resource.filename do
+    source new_resource.uri
     checksum new_resource.checksum
     action :create_if_missing
   end
-  execute "untar alertmanager" do
-    cwd "#{Chef::Config[:file_cache_path]}/"
-    command "tar zxf alertmanager-#{new_resource.version}.#{node['os']}_#{arch}.tar.gz"
-    creates "#{Chef::Config[:file_cache_path]}/alertmanager-#{new_resource.version}.#{node['os']}-#{arch}/alertmanager"
+  execute 'untar alertmanager' do
+    cwd Chef::Config[:file_cache_path]
+    command 'tar zxf ' + new_resource.filename
+    creates Chef::Config[:file_cache_path] + '/' + new_resource.pathname + '/alertmanager'
   end
-  execute "install alertmanager binaries" do
-    cwd "#{Chef::Config[:file_cache_path]}/alertmanager-#{new_resource.version}.#{node['os']}-#{arch}"
-    command "mv alertmanager /usr/bin && mv amtool /usr/bin"
-    creates "/usr/bin/alertmanager"
+  %w(alertmanager amtool).each do |p|
+    execute 'install ' + p + 'binaries' do
+      cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
+      command 'cp ' + p + ' /opt/prometheus/bin/' + p + '-' + new_resource.version
+      creates '/opt/prometheus/bin/' + p + '-' + new_resource.version
+    end
   end
-end
-
-action :start do
-  template "/etc/default/alertmanager" do
+  template '/etc/default/alertmanager' do
     source new_resource.template_name
     cookbook new_resource.cookbook
     owner 'prometheus'
     group 'prometheus'
     variables(
-      :args => new_resource.arguments
+      args: new_resource.arguments
     )
   end
   systemd_service 'alertmanager' do
@@ -56,14 +60,16 @@ action :start do
     end
     service do
       type 'simple'
-      exec_start '/usr/bin/alertmanager $ARGS'
+      exec_start '/opt/prometheus/bin/alertmanager-' + new_resource.version + ' $ARGS'
       exec_reload '/bin/kill -HUP $MAINPID'
       service_environment_file '/etc/default/alertmanager'
       timeout_stop_sec '20s'
       send_sigkill false
     end
   end
-  service "alertmanager" do
-    action [:start,:enable]
+  service 'alertmanager' do
+    action [:start, :enable]
+    subscribes :restart, 'template[/etc/default/alertmanager]',:delayed
+    subscribes :restart, 'systemd_service[/etc/systemd/system/alertmanager.service]',:delayed
   end
 end

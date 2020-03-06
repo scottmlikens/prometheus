@@ -1,9 +1,6 @@
 # Prometheus Cookbook
 
-This cookbook can be used in part or whole to automate [prometheus](https://prometheus.io/) similar to how it is installed in Debian/Ubuntu.
-
-Pull requests are always welcome to improve this cookbook
----------------
+This is an opinionated cookbook to run [prometheus](https://prometheus.io/) in a production environment.  Defaults are written to `/etc/default` and everything runs under the `prometheus` _user_.
 
 Requirements
 ======
@@ -11,118 +8,108 @@ Requirements
 Debian based Linux Distribution using Systemd such as:
   - Ubuntu `16.04`
   - Ubuntu `18.04`
-  - Ubuntu `14.04` is supported for the node exporter only.
-
-It is not tested on other environments but it may work.
 
 Resources and Providers
 -----
-`monitor.rb`
+`monitor.rb`  
+`alertmanager.rb`  
+`exporter.rb`  
 ------
 
 Install or configure or start the Prometheus service using this resource.
 
 Actions:
 
-* `install` - Downloads Prometheus and installs it in `/usr/bin`
-* `config` - Generates `/etc/prometheus/prometheus.yml` using Chef
-> The configuration generator works with the simple configuration tested.  If you need more complex needs feel free to skip using this resource and manage the file how you see fit.
+* `create` - Downloads Prometheus and installs it in `/opt/prometheus/bin`.  This action also starts prometheus.
 
-* `start` - Starts prometheus using Systemd
+### monitor::create
+| Attribute          | Type   | Description                                                      | Default                                                                                                   | Required |
+|--------------------|--------|------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|----------|
+| version            | String | Version of Prometheus to install                                 | `2.16.0`                                                                                                  | Yes      |
+| checksum           | String | sha256 sum of the binary release                                 |                                                                                                           | Yes      |
+| uri                | String | URI to Download Prometheus from                                  | `https://github.com/prometheus/prometheus/releases/download/v2.16.0/prometheus-2.16.0.linux-amd64.tar.gz` | Yes      |
+| home_dir           | String | Home directory for prometheus user                               | `/opt/prometheus`                                                                                         | Yes      |
+| cookbook           | String | Indicated which cookbook holds `prometheus.conf.erb`             | `prometheus`                                                                                              | Yes      |
+| filename           | String | The filename of the downloaded archive from the uri              |                                                                                                           | Yes      |
+| pathname           | String | The path created by the downloaded archive after being extracted |                                                                                                           | Yes      |
+| arguments          | Array  | Command line arguments to start prometheus with                  | `['--config.file="/etc/prometheus/prometheus.yml"']`                                                      | Yes      |
+| template_name      | String | Filename of the template for `/etc/default/prometheus`           | `prometheus.erb`                                                                                          | Yes      |
+| cookbook           | String | Indicated which cookbook holds `prometheus.conf.erb`             | `prometheus`                                                                                              | Yes      |
 
-### monitor::install
-| Attribute | Type | Description | Default | Required |
-|--|--|--|--|--|
-| version | String | Version of Prometheus to install | `2.10.0` | Yes |
-| checksum | String | sha256 sum of the binary release | `f4233783826f18606b79e5cef0686e4a9c2030146a3c7ce134f0add09f5adcb7` | Yes |
-| base_uri | String | Base URI to Download Prometheus from | https://github.com/prometheus/prometheus/releases/download/| Yes |
-| home_dir | String | Home directory for prometheus user | `/opt/prometheus` | Yes |
-| local_storage_path | String | Path where Prometheis stores the Bolt Database | `/var/lib/prometheus` | Yes |
-| cookbook | String | Indicated which cookbook holds `prometheus.conf.erb` | `prometheus` | Yes |
+### alertmanager::create
+| Attribute     | Type   | Description                                                      | Default                                                                                                       | Required |
+|---------------|--------|------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|----------|
+| version       | String | Version of Alertmanager to install                               | `0.20.0`                                                                                                      | Yes      |
+| checksum      | String | Checksum of Alertmanager tarball                                 | `5f17155d669a8d2243b0d179fa46e609e0566876afd0afb09311a8bc7987ab15`                                            | Yes      |
+| uri           | String | URI to Download Alertmanager From                                | `https://github.com/prometheus/alertmanager/releases/download/v0.20.0/alertmanager-0.20.0.linux-amd64.tar.gz` | Yes      |
+| home_dir      | String | Home Directory for Prometheus User                               | `/opt/prometheus`                                                                                             | Yes      |
+| filename      | String | The filename of the downloaded archive from the uri              |                                                                                                               | Yes      |
+| pathname      | String | The path created by the downloaded archive after being extracted |                                                                                                               | Yes      |
+| cookbook      | String | Cookbook name that holds the prometheus.erb template             | `prometheus`                                                                                                  | Yes      |
+| template_name | String | Template name if you don't want to use `prometheus.erb`          | `prometheus.erb`                                                                                              | Yes      |
+| arguments     | String | Arguments to start Alertmanager with                             | `--config.file="/etc/prometheus/alertmanager.yml"`                                                            | Yes      |
 
-### monitor::config
-| Attribute | Type | Description | Default | Required |
-|--|--|--|--|--|
-| global | Hash | The Global Block of the Prometheus Configuration file | `{ "global"=>{"scrape_interval"=>"15s", "evaluation_interval"=>"15s", "external_labels"=>{"monitor"=>"Chef"}}}` | Yes |
-| rule_files |  Array | Array of rule files to load | `[]` | No |
-| scrape_configs| Array| Scrape Configuration block of the prometheus configuration files | `[{'job_name':"node", 'file_sd_configs':[{'files':["targets.json"]}]}]` | Yes |
-
-### monitor::start
-| Attribute | Type | Description | Default | Required |
-|--|--|--|--|--|
-| arguments | Array| Command line arguments to start prometheus with | `['--config.file="/etc/prometheus/prometheus.yml"']` | Yes |
-| template_name | String | Filename of the template for `/etc/default/prometheus` | `prometheus.erb` | Yes |
-| cookbook | String | Indicated which cookbook holds `prometheus.conf.erb` | `prometheus` | Yes |
-
-### alertmanager::install
-| Attribute | Type | Description | Default | Required |
-|--|--|--|--|--|
-| version | String | Version of Alertmanager to install | `0.18.0` | Yes |
-| checksum | String | Checksum of Alertmanager tarball | `5f17155d669a8d2243b0d179fa46e609e0566876afd0afb09311a8bc7987ab15` | Yes |
-| base_uri | String | Base URI to Download Alertmanager From | `https://github.com/prometheus/alertmanager/releases/download/` | Yes |
-| home_dir | String | Home Directory for Prometheus User | `/opt/prometheus` | Yes |
-
-### alertmanager::start
-| Attribute | Type | Description | Default | Required |
-|--|--|--|--|--|
-| cookbook | String | Cookbook name that holds the prometheus.erb template | `prometheus` | Yes |
-| template_name | String | Template name if you don't want to use `prometheus.erb` | `prometheus.erb` | Yes |
-| arguments | String | Arguments to start Alertmanager with | `--config.file="/etc/prometheus/alertmanager.yml"` | Yes |
+### exporter::create
+| Attribute     | Type   | Description                                                                  | Default           | Required |
+|---------------|--------|------------------------------------------------------------------------------|-------------------|----------|
+| checksum      | String | sha256sum of the exporter tarball                                            |                   | Yes      |
+| uri           | String | URI to Download the exporter from                                            |                   | Yes      |
+| filename      | String | The filename of the downloaded archive from the uri                          |                   | Yes      |
+| pathname      | String | The path created by the downloaded archive after being extracted             |                   | Yes      |
+| cookbook      | String | Name of the cookbook that holds the prometheus.erb template                  | `prometheus`      | Yes      |
+| template_name | String | Name of the template to be used to create `/etc/default/prometheus-$example` | `prometheus.erb`  | Yes      |
+| arguments     | Array  | Command line arguments to start the exporter with                            | []                | Yes      |
+| home_dir      | String | Home directory for the prometheus user                                       | `/opt/prometheus` | Yes      |
+| binaries      | Array  | List of the binaries to be installed for the exporter to function            | []                | Yes      |
+| start_command | String | Name of the binary to start the exporter                                     |                   |          |
+| dsn           | String | If using the mysqld exporter use this to set your data source                |                   | No       |
 
 
 Usage
 -----
 
-This cookbook is intended to be a framework to help you monitor your systems.  A few examples are below:
+This cookbook will help you monitor your systems using Prometheus. An example is below
 
 ```ruby
-prometheus_monitor "default" do
-  version "2.10.0"
-  action :install
+directory "/etc/prometheus" do
+  action :create
 end
-global_config={"scrape_interval"=>"15s", "evaluation_interval"=>"15s", "external_labels"=>{"monitor"=>"Test Kitchen"}}
-prometheus_monitor "start" do
-  arguments ["--config.file='/etc/prometheus/prometheus.yml'","--storage.tsdb.retention=30d"]
-  action :start
+cookbook_file "/etc/prometheus/prometheus.yml" do
+  source "prometheus.yml"
 end
 dummynodes=[{"labels"=>{"job"=>"node"}, "targets"=>["localhost:9100"]}]
 file "/etc/prometheus/targets.json" do
   content dummynodes.to_json
 end
-prometheus_monitor "config" do
-  global global_config
-  action :config
+cookbook_file '/etc/prometheus/rules1.rules' do
+  source 'rules1.rules'
 end
-```
-
-Alternatively you can ship the configuration file if the generator does not work for you.
-
-```ruby
 prometheus_monitor "default" do
-  version "2.10.0"
-  action :install
-end
-global_config={"scrape_interval"=>"15s", "evaluation_interval"=>"15s", "external_labels"=>{"monitor"=>"Test Kitchen"}}
-prometheus_monitor "start" do
+  version "2.16.0"
+  action :create
+  uri 'https://github.com/prometheus/prometheus/releases/download/v2.16.0/prometheus-2.16.0.linux-amd64.tar.gz'
+  checksum 'c04e631d18e186b66a51cac3062157298e037ffae784f35ccaaf29e496d65d3f'
+  filename 'prometheus-2.16.0.linux-amd64.tar.gz'
+  pathname 'prometheus-2.16.0.linux-amd64'
   arguments ["--config.file='/etc/prometheus/prometheus.yml'","--storage.tsdb.retention=30d"]
-  action :start
+  action [:install,:start]
 end
-template "/etc/prometheus/prometheus.yml" do
-  source "prometheus.yml"
-end
+service "prometheus_restart" do
 service_name "prometheus"
-action [:start,:enable]
+action :start
 provider Chef::Provider::Service::Systemd
 subscribes :restart, "template[/etc/prometheus/prometheus.yml", :delayed
 end
 ```
+
+Further [examples can be found here](https://github.com/damm/prometheus/tree/master/test/cookbooks/test_prom/recipes)
 
 License and Author
 -------------------
 
 Author:: Scott Likens (<scott@likens.us>)
 
-Copyright 2019 Scott M. Likens
+Copyright 2020 Scott M. Likens
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
