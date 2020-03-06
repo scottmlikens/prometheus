@@ -24,19 +24,16 @@ action :create do
     action :create_if_missing
   end
   execute 'extract ' + new_resource.name do
-    cwd "#{Chef::Config[:file_cache_path]}/"
+    cwd Chef::Config[:file_cache_path]
     command 'tar zxf ' + new_resource.filename
     creates Chef::Config[:file_cache_path] + '/' + new_resource.pathname + '/README.md'
   end
-  if new_resource.binaries.empty?
-    raise "binaries array is unset cannot proceed"
-  else
-    new_resource.binaries.each do |p|
-      execute "install #{p}" do
-        cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
-        command 'cp ' + p + ' ' + new_resource.home_dir + '/bin'
-        creates '/opt/prometheus/bin/' + p
-      end
+  raise 'binaries array is unset cannot proceed' if new_resource.binaries.empty?
+  new_resource.binaries.each do |p|
+    execute 'install ' + p do
+      cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
+      command 'cp ' + p + ' ' + new_resource.home_dir + '/bin'
+      creates '/opt/prometheus/bin/' + p
     end
   end
   template '/etc/default/prometheus-' + new_resource.name do
@@ -45,34 +42,33 @@ action :create do
     owner 'prometheus'
     group 'prometheus'
     variables(
-      :args => new_resource.arguments,
-      :dsn => new_resource.dsn
+      args: new_resource.arguments,
+      dsn: new_resource.dsn
     )
   end
-  if new_resource.start_command   
-    systemd_service 'prometheus-' + new_resource.name do
-      unit do
-        description new_resource.name
-        after %w( networking.service  )
-      end
-      install do
-        wanted_by %w( multi-user.target )
-      end
-      service do
-        type 'simple'
-        exec_start new_resource.home_dir + '/bin/' + new_resource.start_command + ' $ARGS'
-        exec_reload '/bin/kill -HUP $MAINPID'
-        service_environment_file '/etc/default/prometheus-' + new_resource.name
-        timeout_stop_sec '20s'
-        #      verify false
-      end
+  raise 'no start_command given' unless new_resource.start_command
+  systemd_service 'prometheus-' + new_resource.name do
+    unit do
+      description new_resource.name
+      after %w( networking.service  )
     end
-    service 'prometheus-' + new_resource.name do
-      action [:start,:enable]
-      provider Chef::Provider::Service::Systemd
-      subscribes :restart, 'template[/etc/default/prometheus-' + new_resource.name + ']', :delayed
+    install do
+      wanted_by %w( multi-user.target )
     end
-  else
-    raise "no start_command given"
+    service do
+      type 'simple'
+      user 'prometheus'
+      group 'prometheus'
+      exec_start new_resource.home_dir + '/bin/' + new_resource.start_command + ' $ARGS'
+      exec_reload '/bin/kill -HUP $MAINPID'
+      service_environment_file '/etc/default/prometheus-' + new_resource.name
+      timeout_stop_sec '20s'
+      #      verify false
+    end
+  end
+  service 'prometheus-' + new_resource.name do
+    action [:start, :enable]
+    provider Chef::Provider::Service::Systemd
+    subscribes :restart, 'template[/etc/default/prometheus-' + new_resource.name + ']', :delayed
   end
 end

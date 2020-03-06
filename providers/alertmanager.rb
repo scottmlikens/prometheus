@@ -7,8 +7,8 @@ def whyrun_supported?
 end
 
 
-action :install do
-  user "prometheus" do
+action :create do
+  user 'prometheus' do
     system true
     shell '/bin/false'
     home new_resource.home_dir
@@ -17,8 +17,8 @@ action :install do
     action :create
     recursive true
     mode '0755'
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
   end
   directory new_resource.home_dir + '/bin' do
     action :create
@@ -31,28 +31,25 @@ action :install do
     checksum new_resource.checksum
     action :create_if_missing
   end
-  execute "untar alertmanager" do
+  execute 'untar alertmanager' do
     cwd Chef::Config[:file_cache_path]
     command 'tar zxf ' + new_resource.filename
     creates Chef::Config[:file_cache_path] + '/' + new_resource.pathname + '/alertmanager'
   end
-  ["alertmanager","amtool"].each do |p|
+  %w(alertmanager amtool).each do |p|
     execute 'install ' + p + 'binaries' do
       cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
       command 'cp ' + p + ' /opt/prometheus/bin/' + p + '-' + new_resource.version
       creates '/opt/prometheus/bin/' + p + '-' + new_resource.version
     end
   end
-end
-
-action :start do
   template '/etc/default/alertmanager' do
     source new_resource.template_name
     cookbook new_resource.cookbook
     owner 'prometheus'
     group 'prometheus'
     variables(
-      :args => new_resource.arguments
+      args: new_resource.arguments
     )
   end
   systemd_service 'alertmanager' do
@@ -70,7 +67,9 @@ action :start do
       send_sigkill false
     end
   end
-  service "alertmanager" do
-    action [:start,:enable]
+  service 'alertmanager' do
+    action [:start, :enable]
+    subscribes :restart, 'template[/etc/default/alertmanager]',:delayed
+    subscribes :restart, 'systemd_service[/etc/systemd/system/alertmanager.service]',:delayed
   end
 end

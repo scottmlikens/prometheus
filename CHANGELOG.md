@@ -1,12 +1,15 @@
 # prometheus CHANGELOG
 
-# 0.5.0 
+# 1.0.0
 
 Drop Ubuntu 14.04 support
 Remove export.rb resource and provider in favor of an single action resource and provider
 Move installation of exporters to `/opt/prometheus`
 Move installation of prometheus to `/opt/prometheus` and version the binaries to ease upgrade pain
 Same with alertmanager
+Move prometheus and exporters to be run under the `ubuntu` user
+Add restarts to a service to ensure prometheus restarts if you change the command line arguments
+Abandon `:install` and `:start` actions in favor of a simple `:create` action
 
 # 0.4.4
 

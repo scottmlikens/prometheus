@@ -7,8 +7,8 @@ def whyrun_supported?
 end
 
 
-action :install do
-  user "prometheus" do
+action :create do
+  user 'prometheus' do
     system true
     shell '/bin/false'
     home new_resource.home_dir
@@ -17,56 +17,56 @@ action :install do
     action :create
     recursive true
     mode '0755'
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
   end
   directory new_resource.home_dir + '/bin' do
     action :create
     recursive true
     mode '0755'
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
   end
-  directory new_resource.local_storage_path do
+  directory '/var/lib/prometheus' do
     action :create
     recursive true
     mode '0755'
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
   end
   remote_file Chef::Config[:file_cache_path] + '/' + new_resource.filename do
     source new_resource.uri
     checksum new_resource.checksum
     action :create_if_missing
   end
-  execute "untar prometheus" do
+  execute 'untar prometheus' do
     cwd Chef::Config[:file_cache_path] + '/'
     command 'tar zxf ' + new_resource.filename
     creates Chef::Config[:file_cache_path] + '/' + new_resource.pathname + '/prometheus'
   end
-  ["promtool",'prometheus'].each do |p|
+  %w(promtool prometheus).each do |p|
     execute 'install ' + p + 'binaries' do
       cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
       command 'cp ' + p + ' ' + new_resource.home_dir + '/bin/' + p + '-' + new_resource.version
       creates new_resource.home_dir + '/bin/' + p + '-' + new_resource.version
     end
   end
-  directory "/usr/share/doc/prometheus/examples" do
+  directory '/usr/share/doc/prometheus/examples' do
     action :create
     recursive true
-    owner "prometheus"
-    group "prometheus"
+    owner 'prometheus'
+    group 'prometheus'
     mode '0755'
   end
-  ['LICENSE','NOTICE'].each do |p|
-    execute "move document #{p}" do
+  %w(LICENSE NOTICE).each do |p|
+    execute 'move document ' + p do
       cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
       command 'cp ' + p  + ' /usr/share/doc/prometheus/'
       action :run
       creates '/usr/share/doc/prometheus/' + p
     end
   end
-  ['consoles','console_libraries'].each do |p|
+  %w(consoles console_libraries).each do |p|
     execute 'install ' + p + 'examples' do
       cwd Chef::Config[:file_cache_path] + '/' + new_resource.pathname
       command 'cp -r ' + p + ' /usr/share/doc/prometheus/examples'
@@ -74,26 +74,25 @@ action :install do
       creates '/usr/share/doc/prometheus/examples/' + p
     end
   end
-end
-      
-action :start do
   template '/etc/default/prometheus' do
     source new_resource.template_name
     cookbook new_resource.cookbook
     owner 'prometheus'
     group 'prometheus'
     variables(
-      :args => new_resource.arguments
+      args: new_resource.arguments
     )
   end
   systemd_service 'prometheus' do
-    unit do 
+    unit do
       description 'Prometheus Monitoring'
       documentation 'https://www.prometheus.io'
       after %w( multi-user.service )
     end
     service do
       type 'simple'
+      user 'prometheus'
+      group 'prometheus'
       exec_start '/opt/prometheus/bin/prometheus-' + new_resource.version + ' $ARGS'
       exec_reload '/bin/kill -HUP $MAINPID'
       service_environment_file '/etc/default/prometheus'
@@ -101,5 +100,10 @@ action :start do
       send_sigkill false
     end
   end
+  service 'prometheus_nothing' do
+    service_name 'prometheus'
+    action :nothing
+    subscribes :restart, 'template[/etc/default/prometheus]',:delayed
+    subscribes :restart, 'systemd_service[/etc/systemd/system/prometheus.yml]',:delayed
+  end
 end
-

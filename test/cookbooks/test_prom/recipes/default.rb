@@ -9,11 +9,15 @@ cookbook_file '/etc/prometheus/rules1.rules' do
 end
 prometheus_monitor "default" do
   version "2.16.0"
-  action :install
+  action :create
   uri 'https://github.com/prometheus/prometheus/releases/download/v2.16.0/prometheus-2.16.0.linux-amd64.tar.gz'
   checksum 'c04e631d18e186b66a51cac3062157298e037ffae784f35ccaaf29e496d65d3f'
   filename 'prometheus-2.16.0.linux-amd64.tar.gz'
   pathname 'prometheus-2.16.0.linux-amd64'
-  arguments ["--config.file='/etc/prometheus/prometheus.yml'","--storage.tsdb.retention=30d"]
-  action [:install,:start]
+  arguments ["--config.file='/etc/prometheus/prometheus.yml'","--storage.tsdb.retention=30d","--storage.tsdb.path=/var/lib/prometheus/"]
+end
+service "prometheus_test" do
+  service_name "prometheus"
+  action :start
+  subscribes :restart, "systemd_service[/etc/prometheus/prometheus.yml]", :delayed
 end
