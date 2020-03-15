@@ -92,7 +92,7 @@ prometheus_monitor "default" do
   filename 'prometheus-2.16.0.linux-amd64.tar.gz'
   pathname 'prometheus-2.16.0.linux-amd64'
   arguments ["--config.file='/etc/prometheus/prometheus.yml'","--storage.tsdb.retention=30d"]
-  action [:install,:start]
+  action :create
 end
 service "prometheus_restart" do
 service_name "prometheus"
